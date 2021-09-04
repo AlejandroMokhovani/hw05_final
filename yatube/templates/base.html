@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %}{% endblock %} | Yatube</title>
+    <!-- Загрузка статики -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}">
+    <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
+    <!-- pictures -->
+    <link rel="icon" href="static/img/fav/fav.ico" type="image">
+    <link rel="apple-touch-icon" sizes="180x180" href="static/img/fav/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="static/img/fav/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="static/img/fav/favicon-16x16.png">
+    <!-- something else -->
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+</head>
+
+<body>
+  {% include 'includes/nav.html' %}
+    <main>
+        <div class="container">
+            <h1>{% block header %}{% endblock %}</h1>
+            {% block content %}
+            <!-- Содержимое страницы -->
+            {% endblock %}
+        </div>
+    </main>
+  {% include 'includes/footer.html' %}
+</body>
+
+</html>

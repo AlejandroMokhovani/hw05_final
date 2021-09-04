@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Профайл пользователя {{ profile.get_full_name }} {% endblock %} | Yatube
+
+{% block content %}
+<main role="main" class="container">
+  <div class="row">
+    <div class="col-md-3 mb-3 mt-1">
+      {% include "includes/user_card.html" %}
+    </div>
+
+    <div class="col-md-9">
+      <!-- Начало блока с постами -->
+      {% for post in page_obj %}
+      {% include "includes/single_post.html" %}
+      {% endfor %}
+
+      <!-- Здесь постраничная навигация паджинатора -->
+      {% include "posts/includes/paginator.html" %}
+    </div>
+  </div>
+</main>
+{% endblock %}
