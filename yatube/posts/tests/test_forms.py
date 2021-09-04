@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from posts.models import Post, Group, Comment
-from posts.forms import PostForm, CommentForm
+from posts.forms import PostForm
 
 User = get_user_model()
 
@@ -74,12 +74,12 @@ class PostCreateFormTests(TestCase):
         posts_count = Post.objects.count()
 
         small_gif = (
-             b'\x47\x49\x46\x38\x39\x61\x02\x00'
-             b'\x01\x00\x80\x00\x00\x00\x00\x00'
-             b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
-             b'\x00\x00\x00\x2C\x00\x00\x00\x00'
-             b'\x02\x00\x01\x00\x00\x02\x02\x0C'
-             b'\x0A\x00\x3B'
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
         )
         uploaded = SimpleUploadedFile(
             name='small.gif',
@@ -110,9 +110,8 @@ class PostCreateFormTests(TestCase):
                 group=self.group,
                 author=self.user,
                 image='posts/small.gif'
-                ).exists()
+            ).exists()
         )
-
 
     def test_guest_cant_comment(self):
         """Неавторизованный клиент не может оставить комментарий к посту."""
@@ -121,14 +120,13 @@ class PostCreateFormTests(TestCase):
         form_data = {
             'text': 'comment',
         }
-        response = self.guest_client.post(
+        self.guest_client.post(
             reverse('posts:add_comment', kwargs={'post_id': self.post.id}),
             data=form_data,
             follow=True
         )
         # Проверяем, что количество комментариев не изменилось
         self.assertEqual(post.comments.count(), comments_count)
-
 
     def test_user_can_comment(self):
         """Авторизованный клиент может оставить комментарий к посту."""
@@ -154,9 +152,8 @@ class PostCreateFormTests(TestCase):
         self.assertTrue(
             post.comments.filter(
                 text='comment from authorized user',
-                ).exists()
+            ).exists()
         )
-
 
     def test_post_edit(self):
         """Происходит изменение поста в базе данных."""

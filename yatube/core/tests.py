@@ -15,6 +15,6 @@ class ViewTestClass(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_template_nonexist_page(self):
-        """Проверка передачи правильного шаблона для несуществующей страницы."""
+        """Передача правильного шаблона для несуществующей страницы."""
         response = self.guest_client.get('/nonexist-page/')
         self.assertTemplateUsed(response, 'core/404.html')

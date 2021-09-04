@@ -1,9 +1,9 @@
 import shutil
 import tempfile
-import time
+# import time
 import unittest
 
-from django.core.cache import cache
+# from django.core.cache import cache
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
@@ -12,7 +12,7 @@ from django import forms
 from itertools import islice
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from posts.models import Post, Group, Comment, Follow
+from posts.models import Post, Group, Follow
 
 User = get_user_model()
 
@@ -126,7 +126,6 @@ class ContextViewsPagesTests(TestCase):
             author=cls.author,
             group=cls.group,
         )
-
 
     def SetUp(self):
         pass
@@ -317,6 +316,7 @@ class PaginatorPagesTests(TestCase):
                     len(response.context['page_obj'].object_list), post_count
                 )
 
+
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PictureInContextTests(TestCase):
     @classmethod
@@ -339,12 +339,12 @@ class PictureInContextTests(TestCase):
         )
 
         cls.small_gif = (
-             b'\x47\x49\x46\x38\x39\x61\x02\x00'
-             b'\x01\x00\x80\x00\x00\x00\x00\x00'
-             b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
-             b'\x00\x00\x00\x2C\x00\x00\x00\x00'
-             b'\x02\x00\x01\x00\x00\x02\x02\x0C'
-             b'\x0A\x00\x3B'
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
         )
         cls.image = SimpleUploadedFile(
             name='small.gif',
@@ -359,12 +359,10 @@ class PictureInContextTests(TestCase):
             image=cls.image,
         )
 
-
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
-
 
     def test_post_show_correct_context(self):
         """Пост сформирован с правильным контекстом."""
@@ -454,7 +452,7 @@ class CacheMainPageTests(TestCase):
         """кэш."""
 
         # один пост
-        posts_count = Post.objects.count()
+        # posts_count = Post.objects.count()
         form_data = {
             'text': 'comment',
         }
@@ -475,7 +473,7 @@ class CacheMainPageTests(TestCase):
 
         # один удалили, теперь 1 в базе
         Post.objects.filter(
-            text = 'comment'
+            text='comment'
         ).delete()
 
         # но два в кэше должно быть, но там один
@@ -492,7 +490,6 @@ class CacheMainPageTests(TestCase):
         self.assertEqual(
             len(response.context['page_obj'].object_list), Post.objects.count()
         )
-
 
 
 class CreateDeleteFollowTests(TestCase):
@@ -514,7 +511,7 @@ class CreateDeleteFollowTests(TestCase):
         """Проверка создания подписки"""
 
         # юзер подписывается на автора
-        response = self.authorized_client.get(
+        self.authorized_client.get(
             reverse(
                 'posts:profile_follow',
                 kwargs={'username': self.author.username}
@@ -540,7 +537,7 @@ class CreateDeleteFollowTests(TestCase):
         count_following = self.author.following.all().count()
 
         # и отписываем юзера от автора
-        response = self.authorized_client.get(
+        self.authorized_client.get(
             reverse(
                 'posts:profile_unfollow',
                 kwargs={'username': self.author.username}
