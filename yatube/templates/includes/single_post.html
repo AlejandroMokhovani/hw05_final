@@ -72,7 +72,7 @@
 
 <!-- Список оставленных комментариев -->
 
-{% for comment in comments %}
+{% for comment in post.comments.all %}
   <div class="media mb-4">
     <div class="media-body">
       <h5 class="mt-0">
@@ -81,7 +81,7 @@
         </a>
       </h5>
         <p>
-         <small class="text-muted">{{ comment.pub_date }}</small>
+         <small class="text-muted">{{ comment.created }}</small>
         </p>
         <p>
          {{ comment.text }}

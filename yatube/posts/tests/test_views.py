@@ -1,9 +1,7 @@
 import shutil
 import tempfile
-# import time
-import unittest
 
-# from django.core.cache import cache
+from django.core.cache import cache
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
@@ -45,6 +43,7 @@ class ViewsPagesTests(TestCase):
 
     def test_pages_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
+        cache.clear()
         templates_pages_names = {
             reverse('posts:index'): 'base.html',
             reverse('posts:post_create'): 'posts/create_post.html',
@@ -77,8 +76,6 @@ class ContextViewsPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-
-        # cache.clear()
 
         # Создаем неавторизованный клиент
         cls.guest_client = Client()
@@ -127,14 +124,10 @@ class ContextViewsPagesTests(TestCase):
             group=cls.group,
         )
 
-    def SetUp(self):
-        pass
-        # cache.clear()
-
     def test_home_page_show_correct_context(self):
         """Проверяем, что на главную страницу выводится список всех постов."""
 
-        # cache.clear()
+        cache.clear()
 
         posts = Post.objects.all()
         response = self.guest_client.get(reverse('posts:index'))
@@ -209,6 +202,9 @@ class ContextViewsPagesTests(TestCase):
 
     def test_correct_post_display(self):
         """Тестируем корректное отображение поста."""
+
+        cache.clear()
+        
         POST_ID = 3
         posts = Post.objects.all()
         pages = [
@@ -367,68 +363,45 @@ class PictureInContextTests(TestCase):
     def test_post_show_correct_context(self):
         """Пост сформирован с правильным контекстом."""
 
-        # На главной странице
-        response = self.authorized_client.get(reverse('posts:index'))
+        cache.clear()
 
-        first_object = response.context['page_obj'][0]
+        responses = [
+            # На главной странице
+            self.authorized_client.get(
+                reverse('posts:index')
+            ).context['page_obj'][0],
 
-        post_text = first_object.text
-        post_group = first_object.group
-        post_author = first_object.author
-        post_image = first_object.image
+            # На странице группы
+            self.authorized_client.get(
+                reverse(
+                    'posts:group_list',
+                    kwargs={'slug': self.group.slug}
+                )
+            ).context['page_obj'][0],
 
-        self.assertEqual(post_text, 'Текст поста')
-        self.assertEqual(str(post_group), 'Тестовая группа')
-        self.assertEqual(str(post_author), 'auth_user')
-        self.assertEqual(post_image, 'posts/small.gif')
+            # На странице пользователя
+            self.authorized_client.get(
+                reverse(
+                    'posts:profile',
+                    kwargs={'username': self.user.username}
+                )
+            ).context['page_obj'][0],
 
-        # На странице группы
-        response = self.authorized_client.get(
-            reverse('posts:group_list', kwargs={'slug': self.group.slug}))
+            # На странице поста
+            self.authorized_client.get(
+                reverse(
+                    'posts:post_detail',
+                    kwargs={'post_id': self.post.id}
+                )
+            ).context['post'],
+        ]
 
-        first_object = response.context['page_obj'][0]
-
-        post_text = first_object.text
-        post_group = first_object.group
-        post_author = first_object.author
-        post_image = first_object.image
-
-        self.assertEqual(post_text, 'Текст поста')
-        self.assertEqual(str(post_group), 'Тестовая группа')
-        self.assertEqual(str(post_author), 'auth_user')
-        self.assertEqual(post_image, 'posts/small.gif')
-
-        # На странице пользователя
-        response = self.authorized_client.get(
-            reverse('posts:profile', kwargs={'username': self.user.username}))
-
-        first_object = response.context['page_obj'][0]
-
-        post_text = first_object.text
-        post_group = first_object.group
-        post_author = first_object.author
-        post_image = first_object.image
-
-        self.assertEqual(post_text, 'Текст поста')
-        self.assertEqual(str(post_group), 'Тестовая группа')
-        self.assertEqual(str(post_author), 'auth_user')
-        self.assertEqual(post_image, 'posts/small.gif')
-
-        # На странице поста
-        response = self.authorized_client.get(
-            reverse('posts:post_detail', kwargs={'post_id': self.post.id}))
-
-        first_object = response.context['post']
-
-        post_text = first_object.text
-        post_group = first_object.group
-        post_author = first_object.author
-        post_image = first_object.image
-
-        self.assertEqual(post_text, 'Текст поста')
-        self.assertEqual(str(post_group), 'Тестовая группа')
-        self.assertEqual(str(post_author), 'auth_user')
-        self.assertEqual(post_image, 'posts/small.gif')
+        for response in responses:
+            with self.subTest(response=response):
+                self.assertEqual(response.text, 'Текст поста')
+                self.assertEqual(str(response.group), 'Тестовая группа')
+                self.assertEqual(str(response.author), 'auth_user')
+                self.assertEqual(response.image, 'posts/small.gif')
 
 
 class CacheMainPageTests(TestCase):
@@ -447,48 +420,37 @@ class CacheMainPageTests(TestCase):
             author=cls.author,
         )
 
-    @unittest.skip('dont_work')
     def test_cache(self):
-        """кэш."""
+        """Тестирование кэширования главной страницы."""
 
-        # один пост
-        # posts_count = Post.objects.count()
-        form_data = {
-            'text': 'comment',
-        }
+        # чистим кэш, т.е обновляем его и помещаем пост в кэш
+        cache.clear()
 
-        self.author_client.post(
-            reverse('posts:post_create'),
-            data=form_data,
-            follow=True
-        )
-
-        # один добавили стало два
-        # но в ответе должен быть один
+        # запрашиваем страницу и ищем пост на странице
         response = self.author_client.get(reverse('posts:index'))
-
-        self.assertEqual(
-            len(response.context['page_obj'].object_list), Post.objects.count()
+        self.assertContains(
+            response,
+            'Тестовый текст поста'
         )
-
-        # один удалили, теперь 1 в базе
+        # удаляем пост из базы
         Post.objects.filter(
-            text='comment'
+            text='Тестовый текст поста',
         ).delete()
 
-        # но два в кэше должно быть, но там один
+        # не обновляя кэш, ищем пост на странице, которая использует кэш
         response = self.author_client.get(reverse('posts:index'))
-        self.assertEqual(
-            len(response.context['page_obj'].object_list),    # 2 кэш
-            Post.objects.count() + 1                          # 1 база + 1
+        self.assertContains(
+            response,
+            'Тестовый текст поста'
         )
+        # обновляем кэш
+        cache.clear()
 
-        # cache.clear()
-        # time.sleep(21)
-
+        # пустой кэш подтягивает данные из базы, в которой нет поста
         response = self.author_client.get(reverse('posts:index'))
-        self.assertEqual(
-            len(response.context['page_obj'].object_list), Post.objects.count()
+        self.assertNotContains(
+            response,
+            'Тестовый текст поста'
         )
 
 
@@ -506,6 +468,29 @@ class CreateDeleteFollowTests(TestCase):
         cls.author = User.objects.create_user(username='author')
         cls.author_client = Client()
         cls.author_client.force_login(user=cls.author)
+
+    def test_authorized_user_cant_doublefollow(self):
+        """Пользователь не может подписаться, если подписка уже есть"""
+
+        # Cоздаем подписку юзера на автора
+        Follow.objects.create(
+            user=self.user,
+            author=self.author,
+        )
+        # замеряем состояние подписки
+        follower = self.user.follower.all().count()
+        following = self.author.following.all().count()
+
+        # юзер пытается подписаться на автора
+        self.authorized_client.get(
+            reverse(
+                'posts:profile_follow',
+                kwargs={'username': self.author.username}
+            ),
+        )
+        # проверяем что состояние не изменилось
+        self.assertEqual(self.user.follower.all().count(), follower)
+        self.assertEqual(self.author.following.all().count(), following)
 
     def test_authorized_user_can_follow(self):
         """Проверка создания подписки"""
@@ -525,12 +510,10 @@ class CreateDeleteFollowTests(TestCase):
     def test_authorized_user_can_unfollow(self):
         """Проверка удаления подписки"""
 
-        # юзер подписывается на автора
-        self.authorized_client.get(
-            reverse(
-                'posts:profile_follow',
-                kwargs={'username': self.author.username}
-            ),
+        # Cоздаем подписку юзера на автора
+        Follow.objects.create(
+            user=self.user,
+            author=self.author,
         )
         # замеряем состояние
         count_follower = self.user.follower.all().count()

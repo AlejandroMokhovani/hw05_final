@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import cache_page
 
 from .models import Group, Post, User, Follow
 from .forms import PostForm, CommentForm
@@ -14,6 +15,7 @@ def paginator(posts, request):
     return paginator.get_page(page_number)
 
 
+@cache_page(20)
 def index(request):
     posts = Post.objects.all()
     page_obj = paginator(posts, request)
@@ -40,42 +42,31 @@ def profile(request, username):
     page_obj = paginator(posts, request)
 
     # передать, какую кнопку показать
-    following = False
     if request.user.is_authenticated:
         following = Follow.objects.filter(
             user=request.user,
             author=profile,
-        )
-
-    # не показывать кнопку "подписаться/отписаться" на себя
-    show = True
-    if profile == request.user:
-        show = False
-
-    # подписан
-    count_follower = profile.follower.all().count()
-    # подписчиков
-    count_following = profile.following.all().count()
+        ).exists()
+    else:
+        # для незарегистрированного пользователя значение following
+        # может быть любым, но его нужно передать в context
+        following = False
 
     context = {
         'profile': profile,
         'page_obj': page_obj,
         'posts': posts,
         'following': following,
-        'show': show,
-        'count_following': count_following,
-        'count_follower': count_follower,
     }
     return render(request, 'posts/profile.html', context)
 
 
 def post_detail(request, post_id):
+    # комментарии берутся в самом шаблоне post.comments.all
     post = get_object_or_404(Post, id=post_id)
     form = CommentForm(request.POST or None)
-    comments = post.comments.all()
     context = {
         'post': post,
-        'comments': comments,
         'form': form,
         'available_for_comment': True,
     }
@@ -152,13 +143,9 @@ def follow_index(request):
 @login_required
 def profile_follow(request, username):
     # подписка
-    following_author = User.objects.get(username=username)
-    repeat = Follow.objects.filter(
-        user=request.user,
-        author=following_author,
-    )
-    if (request.user != following_author) and (not repeat):
-        Follow.objects.create(
+    following_author = get_object_or_404(User, username=username)
+    if request.user != following_author:
+        Follow.objects.get_or_create(
             user=request.user,
             author=following_author,
         )
@@ -168,7 +155,7 @@ def profile_follow(request, username):
 @login_required
 def profile_unfollow(request, username):
     # отписка
-    following_author = User.objects.get(username=username)
+    following_author = get_object_or_404(User, username=username)
     Follow.objects.filter(
         user=request.user,
         author=following_author,

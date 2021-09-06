@@ -13,8 +13,8 @@
   <ul class="list-group list-group-flush">
     <li class="list-group-item">
       <div class="h6 text-muted">
-        Подписчиков: {{ count_following }} <br>
-        Подписан: {{ count_follower }}
+        Подписчиков: {{ profile.following.all|length }} <br>
+        Подписан: {{ profile.follower.all|length }}
       </div>
     </li>
     <li class="list-group-item">
@@ -28,7 +28,8 @@
 
 <!-- Подписка, отписка -->
 {% if user.is_authenticated %}
-  {% if show %}
+  <!-- не показывать кнопку подписаться на себя -->
+  {% if profile != request.user %}
   <div class="mb-5">
     <br>
     {% if following %}
