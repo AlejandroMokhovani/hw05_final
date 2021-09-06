@@ -204,7 +204,6 @@ class ContextViewsPagesTests(TestCase):
         """Тестируем корректное отображение поста."""
 
         cache.clear()
-        
         POST_ID = 3
         posts = Post.objects.all()
         pages = [
