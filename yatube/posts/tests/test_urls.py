@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
+from django.core.cache import cache
 
 from posts.models import Post, Group
 
@@ -101,6 +102,7 @@ class PostsURLTests(TestCase):
 
     def test_urls_author(self):
         """Проверка доступа для автора."""
+        cache.clear()
         status_code_for_urls = {
             '/': 200,
             '/group/test-slug/': 200,
@@ -116,8 +118,7 @@ class PostsURLTests(TestCase):
                 self.assertEqual(response.status_code, status_code)
 
     def test_urls_author(self):
-        """Проверка вызываемых html-шаблонов от лица автора, потому что
-        автор имеет доступ к любому пути."""
+        """Проверка вызываемых html-шаблонов."""
         templates_url_names = {
             '/': 'base.html',
             '/group/test-slug/': 'posts/group_list.html',
