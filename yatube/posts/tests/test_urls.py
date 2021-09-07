@@ -120,7 +120,7 @@ class PostsURLTests(TestCase):
     def test_urls_author(self):
         """Проверка вызываемых html-шаблонов."""
         templates_url_names = {
-            '/': 'base.html',
+            '/': 'index.html',
             '/group/test-slug/': 'posts/group_list.html',
             '/profile/author/': 'posts/profile.html',
             '/create/': 'posts/create_post.html',
