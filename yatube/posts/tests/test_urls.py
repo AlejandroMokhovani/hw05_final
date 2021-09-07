@@ -102,7 +102,6 @@ class PostsURLTests(TestCase):
 
     def test_urls_author(self):
         """Проверка доступа для автора."""
-        cache.clear()
         status_code_for_urls = {
             '/': 200,
             '/group/test-slug/': 200,
@@ -117,8 +116,9 @@ class PostsURLTests(TestCase):
                 response = self.author_client.get(url)
                 self.assertEqual(response.status_code, status_code)
 
-    def test_urls_author(self):
+    def test_urls_html(self):
         """Проверка вызываемых html-шаблонов."""
+        cache.clear()
         templates_url_names = {
             '/': 'index.html',
             '/group/test-slug/': 'posts/group_list.html',
