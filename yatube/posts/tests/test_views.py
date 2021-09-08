@@ -494,6 +494,10 @@ class CreateDeleteFollowTests(TestCase):
     def test_authorized_user_can_follow(self):
         """Проверка создания подписки"""
 
+        # Проверяем, что не подписки юзера на автора
+        self.assertEqual(self.user.follower.all().count(), 0)
+        self.assertEqual(self.author.following.all().count(), 0)
+
         # юзер подписывается на автора
         self.authorized_client.get(
             reverse(

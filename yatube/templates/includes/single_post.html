@@ -1,4 +1,5 @@
 {% load thumbnail %}
+{% load embed_video_tags %}
 
 <!-- Блок поста -->
 
@@ -21,7 +22,9 @@
       {% endthumbnail %}
 
       <!-- Текст поста -->
+      <p>
       {{ post }}
+      </p>
     </p>
 
     <div class="d-flex justify-content-between align-items-center">

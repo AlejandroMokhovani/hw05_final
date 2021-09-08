@@ -40,17 +40,9 @@ def profile(request, username):
     profile = get_object_or_404(User, username=username)
     posts = profile.posts.all()
     page_obj = paginator(posts, request)
-
-    # передать, какую кнопку показать
-    if request.user.is_authenticated:
-        following = Follow.objects.filter(
-            user=request.user,
-            author=profile,
-        ).exists()
-    else:
-        # для незарегистрированного пользователя значение following
-        # может быть любым, но его нужно передать в context
-        following = False
+    following = request.user.is_authenticated and Follow.objects.filter(
+        author__username=username,
+    ).exists()
 
     context = {
         'profile': profile,
@@ -155,9 +147,7 @@ def profile_follow(request, username):
 @login_required
 def profile_unfollow(request, username):
     # отписка
-    following_author = get_object_or_404(User, username=username)
     Follow.objects.filter(
-        user=request.user,
-        author=following_author,
+        author__username=username,
     ).delete()
     return redirect('posts:follow_index')

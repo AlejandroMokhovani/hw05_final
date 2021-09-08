@@ -16,7 +16,6 @@ ALLOWED_HOSTS = [
 CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
 
 INSTALLED_APPS = [
-    # 'users',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -28,6 +27,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'core',
     'sorl.thumbnail',
+    'embed_video',
 ]
 
 MIDDLEWARE = [
@@ -56,6 +56,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.year',
+                # 'django.core.context_processors.request',
             ],
         },
     },
