@@ -41,6 +41,8 @@ def profile(request, username):
     posts = profile.posts.all()
     page_obj = paginator(posts, request)
     following = request.user.is_authenticated and Follow.objects.filter(
+        user=request.user,
+    ).filter(
         author__username=username,
     ).exists()
 
@@ -148,6 +150,8 @@ def profile_follow(request, username):
 def profile_unfollow(request, username):
     # отписка
     Follow.objects.filter(
+        user=request.user
+    ).filter(
         author__username=username,
     ).delete()
     return redirect('posts:follow_index')
