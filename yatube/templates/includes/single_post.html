@@ -22,7 +22,7 @@
 
       <!-- Текст поста -->
       <p>
-      {{ post }}
+      {{ post|linebreaksbr }}
       </p>
     </p>
 
@@ -86,7 +86,7 @@
          <small class="text-muted">{{ comment.created }}</small>
         </p>
         <p>
-         {{ comment.text }}
+         {{ comment.text|linebreaksbr }}
         </p>
       </div>
     </div>
