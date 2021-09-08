@@ -27,7 +27,6 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'core',
     'sorl.thumbnail',
-    'embed_video',
 ]
 
 MIDDLEWARE = [
